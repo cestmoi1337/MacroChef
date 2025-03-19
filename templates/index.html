@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <h1>🔎 USDA Food Search</h1>
+
+    <form method="POST">
+        <input type="text" name="search_query" placeholder="Enter food name or category" value="{{ search_query }}">
+        <input type="text" name="nutrient_filter" placeholder="Filter by nutrient (optional)" value="{{ nutrient_filter }}">
+        <button type="submit">Search</button>
+    </form>
+
+    {% if results %}
+        <h2>Search Results:</h2>
+        {% for food in results %}
+            <div class="food-item">
+                <strong>{{ food.description }}</strong> - Category: {{ food.category }}
+                {% if food.nutrients %}
+                    <ul>
+                        {% for nutrient in food.nutrients %}
+                            <li>{{ nutrient.nutrientName }}: {{ nutrient.value }} {{ nutrient.unitName }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% elif search_query %}
+        <p>No results found for "{{ search_query }}".</p>
+    {% endif %}
+
+</body>
+</html>
