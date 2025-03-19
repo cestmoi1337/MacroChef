@@ -13,6 +13,7 @@ db = firestore.client()
 def search_food():
     search_query = input("\nEnter a food name or category to search: ").strip().lower()
     nutrient_filter = input("Enter a nutrient name to filter by (or press Enter to skip): ").strip().lower()
+    results_per_page = int(input("How many results per page? (default 5): ") or 5)
 
     print("\n🔎 Searching Firestore...\n")
     
@@ -37,17 +38,41 @@ def search_food():
             else:
                 results.append((description, category, nutrients))
 
-    if results:
-        print("🔎 Search Results:")
-        for i, (desc, cat, nutrients) in enumerate(results, start=1):
+    if not results:
+        print("❌ No matching results found.")
+        return
+
+    # Implement pagination
+    total_results = len(results)
+    current_page = 0
+
+    while True:
+        start = current_page * results_per_page
+        end = start + results_per_page
+        paginated_results = results[start:end]
+
+        print(f"\n🔎 Page {current_page + 1}/{(total_results // results_per_page) + 1} 🔎")
+        for i, (desc, cat, nutrients) in enumerate(paginated_results, start=start + 1):
             print(f"{i}. {desc} - Category: {cat}")
             if nutrients:
                 print("   Nutrients:")
                 for nutrient in nutrients:
                     print(f"   - {nutrient['nutrientName']}: {nutrient['value']} {nutrient['unitName']}")
             print("-" * 50)
-    else:
-        print("❌ No matching results found.")
+
+        # Pagination options
+        print("\nCommands: [n] Next | [p] Previous | [q] Quit")
+        command = input("Enter command: ").strip().lower()
+
+        if command == "n" and end < total_results:
+            current_page += 1
+        elif command == "p" and current_page > 0:
+            current_page -= 1
+        elif command == "q":
+            print("✅ Exiting search.")
+            break
+        else:
+            print("⚠️ Invalid command or no more pages.")
 
 if __name__ == "__main__":
     search_food()
